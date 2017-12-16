@@ -24,7 +24,7 @@ Copyright Tony Liu 2017, All rights reserved
 不适合于商业使用
 '''源码适用于GPLv3
 
-#使用build
+# 使用build
 作为一种方便快捷的实践方式，我们通过用如下的方式来制作一个用户友好的GUI程序，这样方便于普通用户使用。
 
 ### 相关技术
