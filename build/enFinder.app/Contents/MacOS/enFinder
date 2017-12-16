@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# -----------------------------------------------------------------------------
+# Interface: Transfer between Finder and 访达
+#
+# History:
+#    2017-12-11: Iniitial
+#
+# Copyright Tony Liu, 2017
+# TonyLiu2ca@gmail.com
+# -----------------------------------------------------------------------------
+
+cd `dirname $0`
+supportDIR="../Resources"
+source "$supportDIR/pashua"
+
+mainFonfig="
+# Set window title
+*.title = Finder和访达转换 v1.0
+*.transparency = 0.90
+
+# Introductory text
+txt.type = text
+txt.label = 说明：
+txt.text = * 如果你不喜欢”访达”的翻译，请用【我要”Finder”】将Finder和Dock的相关中文翻译改回英文的Finder.[return]* 如果你后悔了，可以用【我要”访达”】改回“访达”中文翻译。
+txt.height = 200
+txt.width = 350
+txt.x = 10
+txt.y = 250
+
+txt1.type = text
+txt1.label = 注意：
+txt1.text = 1. 运行前必须先禁止SIP（上网搜索相关操作）,修改成功后，可以再打开SIP[return]2.本程序只支持本程序内互相转化，用其它方法或者程序的，需要询问该方法和程序的开发者。[return]3. 在使用本程序恢复为中文后，系统被还原。
+txt1.height = 100
+txt1.width = 350
+txt1.x = 10
+txt1.y = 145
+
+txt2.type = text
+txt2.label = 声明：
+txt2.text = 版本1.1，适用于 macOS 10.13.2 及新版本.[return]只适合测试和私用，不适合商用[return]以GNU General Public License v3发布[return]联系作者：github.com/TonyLiu2ca
+txt2.height = 50
+txt2.width = 350
+txt2.x = 10
+txt2.y = 40
+
+# Add a cancel button with default label
+tcBtn.type = cancelbutton
+tcBtn.label = 退出
+enBtn.type = defaultbutton
+enBtn.label = 我要”Finder”
+enBtn.tooltip = 将原版的中文“访达”转换为英语的Finder
+cnBtn.type = button
+cnBtn.label = 我要”访达”
+cnBtn.tooltip = 恢复为原版的中文“访达”
+
+"
+
+
+#if [ -d '../Resources/Pashua.bundle' ]; then
+	# Looks like the Pashua disk image is mounted. Run from there.
+#	customLocation='/Volumes/Pashua'
+#else
+	# Search for Pashua in the standard locations
+#	customLocation=''
+#fi
+customLocation="$supportDIR"
+administrator=""
+password=""
+
+ls -la "$customLocation"
+# Get the icon from the application bundle
+#locate_pashua "$customLocation"
+pashua_run "$mainFonfig" "$customLocation"
+[ "$tcBtn" = "1" ] && exit 0
+[ "$cnBtn" = "1" ] && chOption="Chinese"
+[ "$enBtn" = "1" ] && chOption="English"
+
+while [ "$passowrd" = "" ]; do
+	Adminconf="
+	*.title = 管理员确认
+	pwstring.type = password
+	pwstring.label = 请输入管理员密码
+	pwstring.mandatory = yes
+	qtBtn.type = cancelbutton
+	qtBtn.label = 退出
+	okBtn.type = defaultbutton
+	okBtn.label = 确认
+	"
+	pashua_run "$Adminconf" "$customLocation"
+	[ "$qtBtn" = "1" ] && exit
+	if [ "$pwstring" != "" ]; then
+		echo "$pwstring" | sudo -kS pwd &>/dev/null
+		[ $? -eq 0 ] && passowrd="$pwstring"
+	fi
+done
+
+#echo "chOption=$chOption"
+echo "$pwstring" | sudo -kS $supportDIR/EnglishFinder "$chOption"
+killall Finder Dock
